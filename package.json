@@ -1,0 +1,5 @@
+{
+    "scripts": {
+      "prepare": "pre-commit install"
+    }
+  }

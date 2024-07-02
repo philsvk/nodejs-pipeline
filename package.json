@@ -1,5 +1,25 @@
 {
+    "name": "simple-nodejs-app",
+    "version": "1.0.0",
+    "description": "A simple Node.js application for testing DevSecOps pipeline with pre-commit hooks",
+    "main": "app.js",
     "scripts": {
+      "start": "node app.js",
+      "test": "jest --forceExit",
+      "lint": "eslint .",
       "prepare": "pre-commit install"
-    }
+    },
+    "dependencies": {
+      "express": "^4.18.2"
+    },
+    "devDependencies": {
+      "jest": "^29.5.0",
+      "supertest": "^6.3.3",
+      "eslint": "^8.40.0",
+      "pre-commit": "^1.2.2"
+    },
+    "pre-commit": [
+      "lint",
+      "test"
+    ]
   }

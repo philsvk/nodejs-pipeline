@@ -6,7 +6,7 @@ Triggers:
       - OPEN
       - REVISION
     Branches:
-      - main
+      - dev
 Actions:
   Build:
     Actions:
@@ -71,6 +71,8 @@ Actions:
             - Run: docker run --rm node-app npm test
         Compute:
           Type: EC2
+        DependsOn:
+          - DockerBuild
       Lint:
         Identifier: aws/build@v1
         Inputs:
@@ -88,4 +90,6 @@ Actions:
             - Run: docker run --rm node-app npm run lint
         Compute:
           Type: EC2
+        DependsOn:
+          - DockerBuild
 RunMode: SUPERSEDED

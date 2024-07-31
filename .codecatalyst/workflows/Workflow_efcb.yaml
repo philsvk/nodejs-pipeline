@@ -44,46 +44,10 @@ Actions:
           Steps:
             - Run: echo "Building Docker Image"
             - Run: docker build -t node-app .
-        Compute:
-          Type: EC2
-      Test:
-        Identifier: aws/build@v1
-        Inputs:
-          Sources:
-            - WorkflowSource
-        Outputs:
-          AutoDiscoverReports:
-            Enabled: true
-            ReportNamePrefix: test
-            IncludePaths:
-              - test-reports/*
-            SuccessCriteria:
-              PassRate: 100
-        Configuration:
-          Steps:
             - Run: echo "Running Unit Test"
             - Run: docker run --rm node-app:latest npm test
-        Compute:
-          Type: EC2
-        DependsOn:
-          - DockerBuild
-      Lint:
-        Identifier: aws/build@v1
-        Inputs:
-          Sources:
-            - WorkflowSource
-        Outputs:
-          AutoDiscoverReports:
-            Enabled: true
-            ReportNamePrefix: lint
-            SuccessCriteria:
-              PassRate: 100
-        Configuration:
-          Steps:
             - Run: echo "Run linting"
             - Run: docker run --rm node-app:latest npm run lint
         Compute:
           Type: EC2
-        DependsOn:
-          - DockerBuild
 RunMode: SUPERSEDED

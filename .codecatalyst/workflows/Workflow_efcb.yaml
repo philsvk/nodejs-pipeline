@@ -1,69 +1,91 @@
-Name: Workflow_efcb
+Name: pull-request
 SchemaVersion: "1.0"
-
-# Optional - Set automatic triggers.
 Triggers:
   - Type: PULLREQUEST
-    Branches:
-      - dev
     Events:
       - OPEN
       - REVISION
-
-# Required - Define action configurations.
+    Branches:
+      - main
 Actions:
-  build_unit_test:
-    # Identifies the action. Do not modify this value.
-    Identifier: aws/build@v1.0.0
-    # Specifies the source and/or artifacts to pass to the action as input.
-    Inputs:
-      # Optional
-      Sources:
-        - WorkflowSource # This specifies that the action requires this Workflow as a source
-    Outputs:
-      # Optional; Automatically discover reports for popular test frameworks
-      AutoDiscoverReports:
-        Enabled: true
-        # Use as prefix for the report files
-        ReportNamePrefix: rpt
-    # Defines the action's properties.
-    Configuration:
-      # Required - Steps are sequential instructions that run shell commands
-      Steps:
-        - Run: echo "Building docker image"
-        #     Test\"/></testsuite>" >> report.xml
-        - Run: docker build -t my-node-app .
-        - Run: echo "Docker image built successfully"
-        - Run: echo "Running unit test"
-        - Run: docker run --rm my-node-app:latest npm run test
-        - Run: echo "Running unit test successfully"
-      Container:
-        Registry: CODECATALYST
-        Image: CodeCatalystLinux_x86_64:2024_03
-    Compute:
-      Type: EC2
-    DependsOn:
-      - TruffleHogOSS_4b
-  TruffleHogOSS_4b:
-    # Identifies the action. Do not modify this value.
-    Identifier: aws/github-actions-runner@v1.0.0
-
-    # Specifies the source and/or artifacts to pass to the action as input.
-    Inputs:
-      # Optional
-      Sources:
-        - WorkflowSource # This specifies that the action requires this Workflow as a source
-
-    # Defines the action's properties.
-    Configuration:
-      # Required - Steps are sequential instructions that run shell commands
-      # Action URL: https://github.com/marketplace/actions/trufflehog-oss
-      # Please visit the action URL to look for examples on the action usage.
-      # Be aware that a new version of the action could be available on GitHub.
-      Steps:
-        - uses: trufflesecurity/trufflehog@v3.47.0
-          with:
-            path: 'https://github.com/philsvk/nodejs-pipeline.git' # Required; description: Repository path
-            # base: ' ' # Optional; description: Start scanning from here (usually main branch).
-            # head: ' ' # Optional; description: Scan commits until here (usually dev branch).
-            # extra_args: ' ' # Optional; description: Extra args to be passed to the trufflehog cli.
+  Build:
+    Actions:
+      SCA:
+        Identifier: aws/github-actions-runner@v1
+        Inputs:
+          Sources:
+            - WorkflowSource
+        Configuration:
+          Steps:
+            - name: Trivy Vulnerability Scanner
+              uses: aquasecurity/trivy-action@master
+              with:
+                scan-type: fs
+                ignore-unfixed: true
+                format: sarif
+                output: report.sarif
+                security-checks: vuln,config,secret
+        Outputs:
+          Reports:
+            SCA:
+              Format: SARIFSCA
+              IncludePaths:
+                - report.sarif
+              SuccessCriteria:
+                Vulnerabilities:
+                  Severity: HIGH
+                  Number: 0
+      DockerBuild:
+        Identifier: aws/build@v1
+        Inputs:
+          Sources:
+            - WorkflowSource
+        Outputs:
+          AutoDiscoverReports:
+            Enabled: true
+            ReportNamePrefix: docker-build
+            SuccessCriteria:
+              PassRate: 100
+        Configuration:
+          Steps:
+            - Run: echo "Building Docker Image"
+            - Run: docker build -t node-app .
+        Compute:
+          Type: EC2
+      Test:
+        Identifier: aws/build@v1
+        Inputs:
+          Sources:
+            - WorkflowSource
+        Outputs:
+          AutoDiscoverReports:
+            Enabled: true
+            ReportNamePrefix: test
+            IncludePaths:
+              - test-reports/*
+            SuccessCriteria:
+              PassRate: 100
+        Configuration:
+          Steps:
+            - Run: echo "Running Unit Test"
+            - Run: docker run --rm node-app npm test
+        Compute:
+          Type: EC2
+      Lint:
+        Identifier: aws/build@v1
+        Inputs:
+          Sources:
+            - WorkflowSource
+        Outputs:
+          AutoDiscoverReports:
+            Enabled: true
+            ReportNamePrefix: lint
+            SuccessCriteria:
+              PassRate: 100
+        Configuration:
+          Steps:
+            - Run: Run linting
+            - Run: docker run --rm node-app npm run lint
+        Compute:
+          Type: EC2
+RunMode: SUPERSEDED

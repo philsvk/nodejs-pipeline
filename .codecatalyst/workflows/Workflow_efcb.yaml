@@ -56,4 +56,9 @@ Actions:
             ReportNamePrefix: build
             SuccessCriteria:
               PassRate: 100
+          Reports:
+            Unit_Test:
+              Format: JUNITXML
+              IncludePaths:
+                - output/report.xml
 RunMode: SUPERSEDED

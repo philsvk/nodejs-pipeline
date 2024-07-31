@@ -50,4 +50,10 @@ Actions:
             - Run: docker run --rm node-app:latest npm run lint
         Compute:
           Type: EC2
+        Outputs:
+          AutoDiscoverReports:
+            Enabled: true
+            ReportNamePrefix: build
+            SuccessCriteria:
+              PassRate: 100
 RunMode: SUPERSEDED

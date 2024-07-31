@@ -62,7 +62,7 @@ Actions:
         Configuration:
           Steps:
             - Run: echo "Running Unit Test"
-            - Run: docker run --rm node-app npm test
+            - Run: docker run --rm node-app:latest npm test
         Compute:
           Type: EC2
         DependsOn:
@@ -80,8 +80,8 @@ Actions:
               PassRate: 100
         Configuration:
           Steps:
-            - Run: Run linting
-            - Run: docker run --rm node-app npm run lint
+            - Run: echo "Run linting"
+            - Run: docker run --rm node-app:latest npm run lint
         Compute:
           Type: EC2
         DependsOn:

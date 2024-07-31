@@ -40,12 +40,6 @@ Actions:
         Inputs:
           Sources:
             - WorkflowSource
-        Outputs:
-          AutoDiscoverReports:
-            Enabled: true
-            ReportNamePrefix: docker-build
-            SuccessCriteria:
-              PassRate: 100
         Configuration:
           Steps:
             - Run: echo "Building Docker Image"

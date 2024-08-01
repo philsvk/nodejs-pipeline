@@ -1,4 +1,5 @@
-Name: Workflow_5135
+Name: Push_to_ECR
+RunMode: SUPERSEDED
 SchemaVersion: "1.0"
 
 # Optional - Set automatic triggers.

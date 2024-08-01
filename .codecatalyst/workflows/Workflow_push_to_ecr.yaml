@@ -1,0 +1,42 @@
+Name: Workflow_5e03
+SchemaVersion: "1.0"
+
+# Optional - Set automatic triggers.
+Triggers:
+  - Type: Push
+    Branches:
+      - dev
+
+# Required - Define action configurations.
+Actions:
+  Build_88:
+    # Identifies the action. Do not modify this value.
+    Identifier: aws/build@v1.0.0
+    # Specifies the source and/or artifacts to pass to the action as input.
+    Inputs:
+      # Optional
+      Sources:
+        - WorkflowSource # This specifies that the action requires this Workflow as a source
+    Outputs:
+      # Optional; Automatically discover reports for popular test frameworks
+      AutoDiscoverReports:
+        Enabled: true
+        # Use as prefix for the report files
+        ReportNamePrefix: rpt
+    # Defines the action's properties.
+    Configuration:
+      # Required - Steps are sequential instructions that run shell commands
+      Steps:
+        - Run: aws ecr get-login-password --region ap-southeast-1 | docker login
+            --username AWS --password-stdin
+            058264385613.dkr.ecr.ap-southeast-1.amazonaws.com
+        - Run: docker build -t rvp-dplus-nodejs .
+        - Run: docker tag rvp-dplus-nodejs:latest
+            058264385613.dkr.ecr.ap-southeast-1.amazonaws.com/rvp-dplus-nodejs:latest
+        - Run: docker push
+            058264385613.dkr.ecr.ap-southeast-1.amazonaws.com/rvp-dplus-nodejs:latest
+      Container:
+        Registry: CODECATALYST
+        Image: CodeCatalystLinux_x86_64:2024_03
+    Compute:
+      Type: EC2

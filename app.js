@@ -5,10 +5,15 @@ const crypto = require('crypto');
 const app = express();
 const port = 3000;
 
+const path = require('path');
+
 // Simulated database
 let users = [];
 
 app.use(express.json());
+
+// Serve static files
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -38,6 +43,11 @@ app.post('/users', (req, res) => {
 // Get all users
 app.get('/users', (req, res) => {
   res.json(users);
+});
+
+// Catch-all route to serve your HTML file
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Start the server

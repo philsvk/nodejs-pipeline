@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #message, #userList, #createUserResult {
+            margin-top: 20px;
+        }
+        input, button {
+            margin: 5px 0;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Application</h1>
+    <div id="message"></div>
+    
+    <h2>Create User</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="createUser()">Create User</button>
+    <div id="createUserResult"></div>
+    
+    <h2>User List</h2>
+    <button onclick="getUsers()">Get Users</button>
+    <div id="userList"></div>
+
+    <script>
+        const apiUrl = 'http://localhost:3000';
+
+        // Fetch welcome message
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('message').textContent = data.message;
+            })
+            .catch(error => console.error('Error:', error));
+
+        function createUser() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            fetch(`${apiUrl}/users`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('createUserResult').textContent = JSON.stringify(data);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function getUsers() {
+            fetch(`${apiUrl}/users`)
+                .then(response => response.json())
+                .then(data => {
+                    const userList = document.getElementById('userList');
+                    userList.innerHTML = '<h3>Users:</h3>';
+                    data.forEach(user => {
+                        userList.innerHTML += `<p>ID: ${user.id}, Username: ${user.username}</p>`;
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
